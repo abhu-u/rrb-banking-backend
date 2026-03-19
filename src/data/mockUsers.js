@@ -2,7 +2,7 @@ const MOCK_USERS = [
     {
         _id: 'user_001',
         mobile: '9876543210',
-        pin: '$2a$10$QlWeRbubIA94cNEVdxiV1.GRf44fNQCcBJ0Y1dos3lIbsv2.MkkmYq', // hashed '1234'
+        pin: '$2a$10$osCqtymYveVxfIHQof8MfOGqwE7pIAq0vsxQ8hlcRRd/DrLquT9zcq', // hashed '1234'
         bankId: 'bank_001',
         bankCode: 'UBGB001',
         isVerified: true,
@@ -17,7 +17,7 @@ const MOCK_USERS = [
     {
         _id: 'user_002',
         mobile: '9123456780',
-        pin: '$2a$10$QlWeRbubIA94cNEVdxiV1.GRf44fNQCcBJ0Y1dos3lIbsv2.MkkmYq', // hashed '1234'
+        pin: '$2a$10$osCqtymYveVxfIHQof8MfOGqwE7pIAq0vsxQ8hlcRRd/DrLquT9zcq', // hashed '1234'
         bankId: 'bank_002',
         bankCode: 'JRGB001',
         isVerified: true,
@@ -32,7 +32,7 @@ const MOCK_USERS = [
     {
         _id: 'user_003',
         mobile: '9988776655',
-        pin: '$2a$10$QlWeRbubIA94cNEVdxiV1.GRf44fNQCcBJ0Y1dos3lIbsv2.MkkmYq', // hashed '1234'
+        pin: '$2a$10$osCqtymYveVxfIHQof8MfOGqwE7pIAq0vsxQ8hlcRRd/DrLquT9zcq', // hashed '1234'
         bankId: 'bank_003',
         bankCode: 'MGB001',
         isVerified: true,
