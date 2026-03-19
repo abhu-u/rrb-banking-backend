@@ -52,8 +52,10 @@ const MOCK_ACCOUNTS = {
         isActive: true,
         transactions: [
             { _id: 't10', date: '2025-03-16T08:00:00Z', description: 'Grape Export Payment', amount: 45000, type: 'credit', balance: 91200.75, reference: 'EXP00789' },
-            { _id: 't11', date: '2025-03-13T10:00:00Z', description: 'Drip Irrigation EMI', amount: 3800, type: 'debit', balance: 46200.75, reference: 'EMI00123' },
-            { _id: 't12', date: '2025-03-11T09:45:00Z', description: 'Agriculture Loan Credit', amount: 25000, type: 'credit', balance: 50000.75, reference: 'AGLOAN01' },
+            { _id: 't11', date: '2025-03-15T10:00:00Z', description: 'Namo Shetkari Subsidy Credit', amount: 2000, type: 'credit', balance: 46200.75, reference: 'NSMN2025' },
+            { _id: 't12', date: '2025-03-13T14:30:00Z', description: 'Mahafed Fertilizer Store', amount: 3500, type: 'debit', balance: 44200.75, reference: 'UPI09823' },
+            { _id: 't13', date: '2025-03-11T09:45:00Z', description: 'KCC Loan Interest Credit', amount: 5000, type: 'credit', balance: 47700.75, reference: 'INT-CREDIT' },
+            { _id: 't14', date: '2025-03-08T11:00:00Z', description: 'Payment to Aurangabad Seeds', amount: 1200, type: 'debit', balance: 42700.75, reference: 'TRF-0012' },
         ],
     },
 };

@@ -80,12 +80,41 @@ router.get('/transactions', authenticate, async (req, res) => {
 // POST /api/accounts/transfer
 router.post('/transfer', authenticate, async (req, res) => {
     try {
-        const { beneficiaryName, accountNumber, amount, remark, transferType } = req.body;
+        const { beneficiaryName, accountNumber, amount, remark, transferType, mpin, isBiometric } = req.body;
         const userId = req.user.id;
         const amt = parseFloat(amount);
         const txType = (transferType || 'imps').toLowerCase();
 
         if (isNaN(amt) || amt <= 0) return errorResponse(res, 'Invalid amount', 400);
+
+        if (!mpin && !isBiometric) {
+            return errorResponse(res, 'MPIN or Biometric authentication is required', 400);
+        }
+
+        // 0. Validate MPIN (only if not using Biometric)
+        if (!isBiometric) {
+            let userPinHash = null;
+            try {
+                const mongoose = require('mongoose');
+                if (mongoose.connection.readyState === 1) {
+                    const User = require('../models/User');
+                    const user = await User.findById(userId).select('+pin');
+                    if (user) userPinHash = user.pin;
+                }
+            } catch (_) { }
+
+            if (!userPinHash) {
+                const MOCK_USERS = require('../data/mockUsers');
+                const mockUser = MOCK_USERS.find(u => u._id === userId);
+                if (mockUser) userPinHash = mockUser.pin;
+            }
+
+            if (userPinHash) {
+                const bcrypt = require('bcryptjs');
+                const pinMatch = await bcrypt.compare(mpin, userPinHash);
+                if (!pinMatch) return errorResponse(res, 'Incorrect MPIN', 401);
+            }
+        }
 
         // 1. Get sender account
         const account = await getAccount(userId);
