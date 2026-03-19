@@ -22,6 +22,10 @@ const bankSchema = new mongoose.Schema(
         apiAuthValue: { type: String, default: '' },
         balanceEndpoint: { type: String, default: '/api/v1/balance' },
         transactionEndpoint: { type: String, default: '/api/v1/transactions' },
+        accountInfoPath: { type: String, default: '/api/v1/account-info' },
+        schemesSubsidyPath: { type: String, default: '/api/v1/subsidies' },
+        loansPath: { type: String, default: '/api/v1/loans' },
+        investmentsPath: { type: String, default: '/api/v1/investments' },
     },
     { timestamps: true }
 );
