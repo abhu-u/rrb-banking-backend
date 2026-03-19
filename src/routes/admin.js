@@ -8,6 +8,7 @@ const MOCK_ACCOUNTS = require('../data/mockAccounts');
 const MOCK_LOANS = require('../data/mockLoans');
 const MOCK_SUBSIDIES = require('../data/mockSubsidies');
 const MOCK_NOTIFICATIONS = require('../data/mockNotifications');
+const APPLICATIONS = require('../data/mockSubsidyApplications');
 
 // Simple admin key middleware (replace with proper admin auth in production)
 const adminAuth = (req, res, next) => {
@@ -302,6 +303,84 @@ router.post('/users/:userId/transactions', adminAuth, (req, res) => {
     account.transactions.push(newTxn);
 
     return successResponse(res, newTxn, 'Mock transaction added', 201);
+});
+
+// GET /api/admin/subsidy-applications — list all pending applications
+router.get('/subsidy-applications', adminAuth, (req, res) => {
+    const { status } = req.query;
+    let apps = [...APPLICATIONS];
+    if (status) apps = apps.filter(a => a.status === status);
+    return successResponse(res, apps, 'Applications fetched');
+});
+
+// PATCH /api/admin/subsidy-applications/:id — approve or reject
+router.patch('/subsidy-applications/:id', adminAuth, (req, res) => {
+    const { status, remarks } = req.body;
+    if (!['approved', 'rejected', 'disbursed'].includes(status)) {
+        return errorResponse(res, 'Status must be approved, rejected, or disbursed', 400);
+    }
+
+    const appIndex = APPLICATIONS.findIndex(a => a._id === req.params.id);
+    if (appIndex === -1) return errorResponse(res, 'Application not found', 404);
+
+    APPLICATIONS[appIndex].status = status;
+    APPLICATIONS[appIndex].reviewedAt = new Date().toISOString();
+    APPLICATIONS[appIndex].remarks = remarks || '';
+
+    // If approved or disbursed, add to the user's subsidy list
+    if (status === 'approved' || status === 'disbursed') {
+        const app = APPLICATIONS[appIndex];
+        if (!MOCK_SUBSIDIES[app.userId]) MOCK_SUBSIDIES[app.userId] = [];
+        const alreadyAdded = MOCK_SUBSIDIES[app.userId].find(s => s.schemeCode === app.schemeCode);
+        if (!alreadyAdded) {
+            MOCK_SUBSIDIES[app.userId].unshift({
+                _id: `sub_${Date.now()}`,
+                userId: app.userId,
+                bankId: app.bankId,
+                schemeName: app.schemeName,
+                schemeCode: app.schemeCode,
+                benefitAmount: app.benefitAmount,
+                status: status === 'disbursed' ? 'disbursed' : 'active',
+                applicationDate: app.appliedAt,
+                disbursementDate: status === 'disbursed' ? new Date().toISOString() : null,
+                description: `Approved: ${app.schemeName}`,
+                category: 'agriculture',
+                ministry: 'Govt. of Maharashtra',
+            });
+        }
+        // Also push a notification to the user
+        if (!MOCK_NOTIFICATIONS[app.userId]) MOCK_NOTIFICATIONS[app.userId] = [];
+        MOCK_NOTIFICATIONS[app.userId].unshift({
+            _id: `notif_${Date.now()}`,
+            userId: app.userId,
+            title: status === 'disbursed' ? '💰 Subsidy Disbursed!' : '✅ Application Approved',
+            message: status === 'disbursed'
+                ? `₹${app.benefitAmount.toLocaleString('en-IN')} for ${app.schemeName} has been credited to your account.`
+                : `Your application for ${app.schemeName} has been approved.`,
+            type: 'success',
+            isRead: false,
+            icon: 'checkmark-circle',
+            amount: app.benefitAmount,
+            priority: 'high',
+            createdAt: new Date().toISOString(),
+        });
+    } else if (status === 'rejected') {
+        const app = APPLICATIONS[appIndex];
+        if (!MOCK_NOTIFICATIONS[app.userId]) MOCK_NOTIFICATIONS[app.userId] = [];
+        MOCK_NOTIFICATIONS[app.userId].unshift({
+            _id: `notif_${Date.now()}`,
+            userId: app.userId,
+            title: '❌ Application Rejected',
+            message: `Your application for ${app.schemeName} was not approved. Remarks: ${remarks || 'Please contact your branch.'}`,
+            type: 'error',
+            isRead: false,
+            icon: 'close-circle',
+            priority: 'medium',
+            createdAt: new Date().toISOString(),
+        });
+    }
+
+    return successResponse(res, APPLICATIONS[appIndex], 'Application updated');
 });
 
 module.exports = router;
